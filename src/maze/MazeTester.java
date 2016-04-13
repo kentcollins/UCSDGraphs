@@ -1,5 +1,7 @@
 package maze;
 
+import java.util.List;
+
 public class MazeTester {
 
 	public static void main(String[] args) {
@@ -34,7 +36,10 @@ public class MazeTester {
 		graph.getNode(2, 0).pair(graph.getNode(3, 0));
 		graph.getNode(2, 3).pair(graph.getNode(3, 3));
 		graph.printMazeGraph();
-		graph.bfs(graph.getNode(3, 3), graph.getNode(2, 0));
+		MazeNode start = graph.getNode(3, 3);
+		MazeNode finish = graph.getNode(2, 0);
+		List<MazeNode> path = graph.bfs(start, finish);
+		graph.markPath(path);
 		System.out.println();
 		graph.printMazeGraph();
 

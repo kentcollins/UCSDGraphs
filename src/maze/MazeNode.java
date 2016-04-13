@@ -5,8 +5,8 @@ import java.util.List;
 
 public class MazeNode {
 
-	List<MazeNode> neighbors;
-	char drawChar = '-';
+	private List<MazeNode> neighbors;
+	private char drawChar = '-';
 	
 	public MazeNode(){
 		neighbors = new ArrayList<MazeNode>();
@@ -30,6 +30,10 @@ public class MazeNode {
 			addNeighbor(other);
 			other.addNeighbor(this);
 		}
+	}
+	
+	public List<MazeNode> getNeighbors() {
+		return neighbors;
 	}
 
 }
