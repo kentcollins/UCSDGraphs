@@ -1,8 +1,8 @@
 /**
  * @author UCSD MOOC development team and YOU
  * 
- * A class which reprsents a graph of geographic locations
- * Nodes in the graph are intersections between 
+ * A class which represents a graph of geographic locations
+ * Nodes in the graph are intersections between roads
  *
  */
 package roadgraph;
@@ -18,25 +18,15 @@ import java.util.function.Consumer;
 import geography.GeographicPoint;
 import util.GraphLoader;
 
-/**
- * @author UCSD MOOC development team and YOU
- * 
- *         A class which represents a graph of geographic locations Nodes in the
- *         graph are intersections between
- *
- */
 public class MapGraph {
-	// TODO: Add your member variables here in WEEK 2
+	// 
 	private HashMap<GeographicPoint, List<Road>> adjList;
-	private HashSet<GeographicPoint> intersections;
 
 	/**
 	 * Create a new empty MapGraph
 	 */
 	public MapGraph() {
-		// TODO: Implement in this constructor in WEEK 2
 		adjList = new HashMap<GeographicPoint, List<Road>>();
-		intersections = new HashSet<GeographicPoint>();
 	}
 
 	/**
@@ -45,8 +35,7 @@ public class MapGraph {
 	 * @return The number of vertices in the graph.
 	 */
 	public int getNumVertices() {
-		// TODO: Implement this method in WEEK 2
-		return intersections.size();
+		return adjList.keySet().size();
 	}
 
 	/**
@@ -55,12 +44,7 @@ public class MapGraph {
 	 * @return The vertices in this graph as GeographicPoints
 	 */
 	public Set<GeographicPoint> getVertices() {
-		// TODO: Implement this method in WEEK 2
-		Set<GeographicPoint> vertices = new HashSet<GeographicPoint>();
-		for (GeographicPoint gp : vertices) {
-			vertices.add(gp);
-		}
-		return vertices;
+		return adjList.keySet();
 	}
 
 	/**
@@ -69,14 +53,12 @@ public class MapGraph {
 	 * @return The number of edges in the graph.
 	 */
 	public int getNumEdges() {
-		// TODO: Implement this method in WEEK 2
+		// Access each intersection, accumulate the number of outbound roads
 		int numRoads = 0;
 		for (GeographicPoint gp : adjList.keySet()) {
-			System.out.println("Edges from "+gp+": "+adjList.get(gp).size());
 			numRoads += adjList.get(gp).size();
 		}
-		System.out.println("Total edges "+numRoads);
-		return numRoads/2;
+		return numRoads;
 	}
 
 	/**
@@ -90,11 +72,12 @@ public class MapGraph {
 	 *         already in the graph, or the parameter is null).
 	 */
 	public boolean addVertex(GeographicPoint location) {
-		// TODO: Implement this method in WEEK 2
-		if (location == null || intersections.contains(location)) {
+		if (location == null || adjList.keySet().contains(location)) {
 			return false;
 		}
-		intersections.add(location);
+		// The location is new, so add it to our keys and associate it with 
+		// an empty list of roads
+		adjList.put(location, new ArrayList<Road>());
 		return true;
 	}
 
@@ -119,20 +102,14 @@ public class MapGraph {
 	 */
 	public void addEdge(GeographicPoint from, GeographicPoint to, String roadName, String roadType, double length)
 			throws IllegalArgumentException {
-
-		if (!intersections.contains(from) || !intersections.contains(to) || from == null || to == null
+		// Check for conditions that should throw the requested exception
+		if (!adjList.keySet().contains(from) || !adjList.keySet().contains(to) || from == null || to == null
 				|| roadName == null || roadType == null || length < 0)
 			throw new IllegalArgumentException("Invalid arguments");
-		// TODO: Implement this method in WEEK 2
+		// Construct a new road based on the information provided
 		Road r = new Road(from, to, roadName, roadType, length);
-		if (!adjList.containsKey(from)) {
-			adjList.put(from, new ArrayList<Road>());
-		}
-		if (!adjList.containsKey(to)) {
-			adjList.put(to, new ArrayList<Road>());
-		}
+		// Add this new road as an outbound edge from the vertex "from"
 		adjList.get(from).add(r);
-		adjList.get(to).add(r);
 	}
 
 	/**
@@ -167,37 +144,41 @@ public class MapGraph {
 	 */
 	public List<GeographicPoint> bfs(GeographicPoint start, GeographicPoint goal,
 			Consumer<GeographicPoint> nodeSearched) {
-		// TODO: Implement this method in WEEK 2
+		// queue will be having lots of adds and removals, so use a LinkedList
 		List<GeographicPoint> queue = new LinkedList<GeographicPoint>();
+		// parents associates each vertex encountered with its parent
 		HashMap<GeographicPoint, GeographicPoint> parents = new HashMap<GeographicPoint, GeographicPoint>();
+		// visited tracks vertices already evaluated, avoiding an infinite loop
 		HashSet<GeographicPoint> visited = new HashSet<GeographicPoint>();
 		GeographicPoint curr = start;
+		// the starting point of our path has no parent, so assign null
 		parents.put(curr, null);
 		queue.add(curr);
 		while (queue.size() > 0 && !curr.equals(goal)) {
 			curr = queue.remove(0);
-			nodeSearched.accept(curr);
 			visited.add(curr);
-			for (GeographicPoint gp: adjList.keySet()){
-				List<Road> roads = adjList.get(gp);
-				for (Road r:roads) {
-					GeographicPoint g = r.getOtherEnd(gp);
-					if (!visited.contains(g)) {
-						queue.add(g);
-						parents.put(g, gp);
-						System.out.println("Added "+gp+" as the parent of "+g);
-					}
+			// provide the current node to our consumer for drawing
+			nodeSearched.accept(curr);
+			// get each neighbor, record curr as its parent, and add it to queue
+			List<Road> roads = adjList.get(curr);
+			for (Road r : roads) {
+				GeographicPoint g = r.getOtherEnd(curr);
+				if (!visited.contains(g)) {
+					queue.add(g);
+					parents.put(g, curr);
 				}
 
 			}
 		}
-		System.out.println("Arrived at goal "+goal+" or null: "+curr);
-		if (!curr.equals(goal)) return null;
+		// if queue is empty and curr!= goal then there is no path
+		if (!curr.equals(goal))
+			return null;
+		//Build a new list to store the intersections in order of the path
 		List<GeographicPoint> path = new LinkedList<GeographicPoint>();
 		path.add(0, curr);
-		while (curr!=start) {
-		  curr = parents.get(curr); // returns parent of the current node
-		  path.add(0, curr); // push to front of queue
+		while (curr != start) {
+			curr = parents.get(curr); // get the parent of our current node
+			path.add(0, curr); // push the parent to the front of queue
 		}
 		return path;
 	}
@@ -242,7 +223,7 @@ public class MapGraph {
 
 		return null;
 	}
-	
+
 	/**
 	 * Find the path from start to goal using A-Star search
 	 * 

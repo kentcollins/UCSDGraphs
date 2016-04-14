@@ -1,3 +1,7 @@
+/** 
+ * Models a road having a name, type and length constructed between to geographic end points.
+ * 
+ */
 package roadgraph;
 
 import geography.GeographicPoint;
@@ -16,9 +20,15 @@ public class Road {
 		this.length = length;
 	}
 	
+	/** Determine vertex at other end.
+	 * 
+	 * @param gp the vertex we already know, one of this road's end points.
+	 * @return the opposing vertex or null if the parameter is not an end point.
+	 */
 	public GeographicPoint getOtherEnd(GeographicPoint gp) {
 		if (endpoints[0].equals(gp)) return endpoints[1];
-		return endpoints[0];
+		if (endpoints[1].equals(gp)) return endpoints[0];
+		return null;
 	}
 
 	public GeographicPoint[] getEndpoints() {
@@ -41,7 +51,6 @@ public class Road {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[Road from: "+endpoints[0]+" to "+endpoints[1]+"]");
 		return sb.toString();
-		
 	}
 	
 	
