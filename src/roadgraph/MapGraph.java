@@ -72,9 +72,11 @@ public class MapGraph {
 		// TODO: Implement this method in WEEK 2
 		int numRoads = 0;
 		for (GeographicPoint gp : adjList.keySet()) {
+			System.out.println("Edges from "+gp+": "+adjList.get(gp).size());
 			numRoads += adjList.get(gp).size();
 		}
-		return numRoads;
+		System.out.println("Total edges "+numRoads);
+		return numRoads/2;
 	}
 
 	/**
@@ -126,10 +128,10 @@ public class MapGraph {
 		if (!adjList.containsKey(from)) {
 			adjList.put(from, new ArrayList<Road>());
 		}
-		adjList.get(from).add(r);
 		if (!adjList.containsKey(to)) {
-			adjList.put(from, new ArrayList<Road>());
+			adjList.put(to, new ArrayList<Road>());
 		}
+		adjList.get(from).add(r);
 		adjList.get(to).add(r);
 	}
 
@@ -183,14 +185,20 @@ public class MapGraph {
 					if (!visited.contains(g)) {
 						queue.add(g);
 						parents.put(g, gp);
+						System.out.println("Added "+gp+" as the parent of "+g);
 					}
 				}
 
 			}
 		}
+		System.out.println("Arrived at goal "+goal+" or null: "+curr);
 		if (!curr.equals(goal)) return null;
 		List<GeographicPoint> path = new LinkedList<GeographicPoint>();
-		curr = start;
+		path.add(0, curr);
+		while (curr!=start) {
+		  curr = parents.get(curr); // returns parent of the current node
+		  path.add(0, curr); // push to front of queue
+		}
 		return path;
 	}
 
@@ -234,7 +242,7 @@ public class MapGraph {
 
 		return null;
 	}
-
+	
 	/**
 	 * Find the path from start to goal using A-Star search
 	 * 

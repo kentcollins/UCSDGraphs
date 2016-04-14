@@ -37,6 +37,12 @@ public class Road {
 		return length;
 	}
 	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[Road from: "+endpoints[0]+" to "+endpoints[1]+"]");
+		return sb.toString();
+		
+	}
 	
 	
 

@@ -11,9 +11,11 @@ public class CorrectAnswer {
     public int vertices;
     public int edges;
     public List<GeographicPoint> path;
+    
+    Scanner s;
     public CorrectAnswer(String file, boolean hasEdges) {
         try {
-            Scanner s = new Scanner(new File(file));
+           s = new Scanner(new File(file));
             s.useLocale(Locale.ENGLISH);
             if (hasEdges) {
                 vertices = s.nextInt();
@@ -31,6 +33,9 @@ public class CorrectAnswer {
         } catch (Exception e) {
             System.err.println("Error reading correct answer!");
             e.printStackTrace();
+        }
+        finally {
+        	s.close();
         }
     }
 }

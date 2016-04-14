@@ -134,13 +134,16 @@ public class DegreeGrader {
      */
     public List<Integer> readCorrect(String file) {
         List<Integer> ret = new ArrayList<Integer>();
+        Scanner s = null;
         try {
-            Scanner s = new Scanner(new File(file));
+            s = new Scanner(new File(file));
             while(s.hasNextInt()) { 
                 ret.add(s.nextInt());
             }
         } catch (Exception e) {
             feedback += "\nCould not open answer file! Please submit a bug report.";
+        } finally {
+        	s.close();
         }
         return ret;
     }
