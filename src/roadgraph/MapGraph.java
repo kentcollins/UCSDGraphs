@@ -144,14 +144,10 @@ public class MapGraph {
 	 */
 	public List<GeographicPoint> bfs(GeographicPoint start, GeographicPoint goal,
 			Consumer<GeographicPoint> nodeSearched) {
-		// queue will be having lots of adds and removals, so use a LinkedList
 		List<GeographicPoint> queue = new LinkedList<GeographicPoint>();
-		// parents associates each vertex encountered with its parent
 		HashMap<GeographicPoint, GeographicPoint> parents = new HashMap<GeographicPoint, GeographicPoint>();
-		// visited tracks vertices already evaluated, avoiding an infinite loop
 		HashSet<GeographicPoint> visited = new HashSet<GeographicPoint>();
 		GeographicPoint curr = start;
-		// the starting point of our path has no parent, so assign null
 		parents.put(curr, null);
 		queue.add(curr);
 		while (queue.size() > 0 && !curr.equals(goal)) {
@@ -170,15 +166,19 @@ public class MapGraph {
 
 			}
 		}
-		// if queue is empty and curr!= goal then there is no path
+		
 		if (!curr.equals(goal))
 			return null;
-		//Build a new list to store the intersections in order of the path
-		List<GeographicPoint> path = new LinkedList<GeographicPoint>();
+		else return buildParentPath(curr, parents);
+	}
+
+	private List<GeographicPoint> buildParentPath(GeographicPoint curr, HashMap<GeographicPoint, GeographicPoint> parents ) {
+		List<GeographicPoint> path = new LinkedList<>();
 		path.add(0, curr);
-		while (curr != start) {
-			curr = parents.get(curr); // get the parent of our current node
-			path.add(0, curr); // push the parent to the front of queue
+		while (true) {
+			curr = parents.get(curr); 
+			if (curr!=null)	path.add(0, curr); 
+			else {break;}
 		}
 		return path;
 	}
