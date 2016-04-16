@@ -6,13 +6,13 @@ package roadgraph;
 
 import geography.GeographicPoint;
 
-public class Road {
+public class MapRoad {
 	GeographicPoint from, to;
 	String roadName;
 	String roadType;
 	double length;
 	
-	public Road(GeographicPoint start, GeographicPoint finish, String roadName,
+	public MapRoad(GeographicPoint start, GeographicPoint finish, String roadName,
 			String roadType, double length){
 		from = start;
 		to = finish;

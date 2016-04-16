@@ -20,13 +20,13 @@ import util.GraphLoader;
 
 public class MapGraph {
 	// 
-	private HashMap<GeographicPoint, List<Road>> adjList;
+	private HashMap<GeographicPoint, List<MapRoad>> adjList;
 
 	/**
 	 * Create a new empty MapGraph
 	 */
 	public MapGraph() {
-		adjList = new HashMap<GeographicPoint, List<Road>>();
+		adjList = new HashMap<GeographicPoint, List<MapRoad>>();
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class MapGraph {
 		}
 		// The location is new, so add it to our keys and associate it with 
 		// an empty list of roads
-		adjList.put(location, new ArrayList<Road>());
+		adjList.put(location, new ArrayList<MapRoad>());
 		return true;
 	}
 
@@ -107,7 +107,7 @@ public class MapGraph {
 				|| roadName == null || roadType == null || length < 0)
 			throw new IllegalArgumentException("Invalid arguments");
 		// Construct a new road based on the information provided
-		Road r = new Road(from, to, roadName, roadType, length);
+		MapRoad r = new MapRoad(from, to, roadName, roadType, length);
 		// Add this new road as an outbound edge from the vertex "from"
 		adjList.get(from).add(r);
 	}
@@ -156,8 +156,8 @@ public class MapGraph {
 			// provide the current node to our consumer for drawing
 			nodeSearched.accept(curr);
 			// get each neighbor, record curr as its parent, and add it to queue
-			List<Road> roads = adjList.get(curr);
-			for (Road r : roads) {
+			List<MapRoad> roads = adjList.get(curr);
+			for (MapRoad r : roads) {
 				GeographicPoint g = r.getOtherEnd(curr);
 				if (!visited.contains(g)) {
 					queue.add(g);
@@ -172,12 +172,18 @@ public class MapGraph {
 		else return buildParentPath(curr, parents);
 	}
 
-	private List<GeographicPoint> buildParentPath(GeographicPoint curr, HashMap<GeographicPoint, GeographicPoint> parents ) {
+	/** Helper method to build a path from a map of node parents.
+	 * 
+	 * @param child the initial node for which a parent is required
+	 * @param parents mapping of each node to its parent
+	 * @return ordered list beginning with ultimate parent and leading to original child
+	 */
+	private List<GeographicPoint> buildParentPath(GeographicPoint child, HashMap<GeographicPoint, GeographicPoint> parents ) {
 		List<GeographicPoint> path = new LinkedList<>();
-		path.add(0, curr);
+		path.add(0, child);
 		while (true) {
-			curr = parents.get(curr); 
-			if (curr!=null)	path.add(0, curr); 
+			child = parents.get(child); 
+			if (child!=null)	path.add(0, child); 
 			else {break;}
 		}
 		return path;
@@ -216,10 +222,10 @@ public class MapGraph {
 	 */
 	public List<GeographicPoint> dijkstra(GeographicPoint start, GeographicPoint goal,
 			Consumer<GeographicPoint> nodeSearched) {
-		MinHeap<GeographicPoint> pq = new MinHeap<>();
+		List<GeographicPoint> path = new LinkedList<>();
 		// nodeSearched.accept(next.getLocation());
 
-		return null;
+		return path;
 	}
 
 	/**
