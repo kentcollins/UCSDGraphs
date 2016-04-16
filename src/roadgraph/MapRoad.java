@@ -7,10 +7,10 @@ package roadgraph;
 import geography.GeographicPoint;
 
 public class MapRoad {
-	GeographicPoint from, to;
-	String roadName;
-	String roadType;
-	double length;
+	private GeographicPoint from, to;
+	private String roadName;
+	private String roadType;
+	private double length;
 	
 	public MapRoad(GeographicPoint start, GeographicPoint finish, String roadName,
 			String roadType, double length){
@@ -54,7 +54,7 @@ public class MapRoad {
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("[Road from: "+from+" to "+to+"]");
+		sb.append(roadName+" [Road from: "+from+" to "+to+"]");
 		return sb.toString();
 	}
 	

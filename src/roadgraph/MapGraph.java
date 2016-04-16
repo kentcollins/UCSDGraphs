@@ -20,13 +20,13 @@ import util.GraphLoader;
 
 public class MapGraph {
 	// 
-	private HashMap<GeographicPoint, List<MapRoad>> adjList;
+	private HashMap<GeographicPoint, List<GeographicPoint>> adjList;
 
 	/**
 	 * Create a new empty MapGraph
 	 */
 	public MapGraph() {
-		adjList = new HashMap<GeographicPoint, List<MapRoad>>();
+		adjList = new HashMap<>();
 	}
 
 	/**
@@ -44,7 +44,11 @@ public class MapGraph {
 	 * @return The vertices in this graph as GeographicPoints
 	 */
 	public Set<GeographicPoint> getVertices() {
-		return adjList.keySet();
+		Set<GeographicPoint> vertices = new HashSet<>();
+		for (GeographicPoint gp:adjList.keySet()) {
+			vertices.add(gp);
+		}
+		return vertices;
 	}
 
 	/**
@@ -75,9 +79,8 @@ public class MapGraph {
 		if (location == null || adjList.keySet().contains(location)) {
 			return false;
 		}
-		// The location is new, so add it to our keys and associate it with 
-		// an empty list of roads
-		adjList.put(location, new ArrayList<MapRoad>());
+		GeographicPoint gp = new MapNode(location);
+		adjList.put(gp, new ArrayList<>());
 		return true;
 	}
 
@@ -103,13 +106,25 @@ public class MapGraph {
 	public void addEdge(GeographicPoint from, GeographicPoint to, String roadName, String roadType, double length)
 			throws IllegalArgumentException {
 		// Check for conditions that should throw the requested exception
-		if (!adjList.keySet().contains(from) || !adjList.keySet().contains(to) || from == null || to == null
-				|| roadName == null || roadType == null || length < 0)
-			throw new IllegalArgumentException("Invalid arguments");
+		if (!adjList.keySet().contains(from) || !adjList.keySet().contains(to))
+			throw new IllegalArgumentException("One or both road endpoints not already a known node");
+		if (from == null || to == null) 
+			throw new IllegalArgumentException("Road endpoints may not be null");
+		if (roadName == null || roadType == null)
+			throw new IllegalArgumentException("Road properties may not be null");
+		if (length < 0)
+			throw new IllegalArgumentException("Roads cannot have a negative length");
 		// Construct a new road based on the information provided
-		MapRoad r = new MapRoad(from, to, roadName, roadType, length);
-		// Add this new road as an outbound edge from the vertex "from"
-		adjList.get(from).add(r);
+		MapRoad road = new MapRoad(from, to, roadName, roadType, length);
+		((MapNode) getMapNode(from)).addRoad(road);
+		adjList.get(from).add(to);
+	}
+	
+	private GeographicPoint getMapNode(GeographicPoint gp) {
+		for (GeographicPoint p:adjList.keySet()) {
+			if (gp.equals(p)) return p;
+		}
+		return null;
 	}
 
 	/**
@@ -144,29 +159,29 @@ public class MapGraph {
 	 */
 	public List<GeographicPoint> bfs(GeographicPoint start, GeographicPoint goal,
 			Consumer<GeographicPoint> nodeSearched) {
-		List<GeographicPoint> queue = new LinkedList<GeographicPoint>();
-		HashMap<GeographicPoint, GeographicPoint> parents = new HashMap<GeographicPoint, GeographicPoint>();
+		List<GeographicPoint> queue = new LinkedList<>();
+		HashMap<GeographicPoint, GeographicPoint> parents = new HashMap<>();
 		HashSet<GeographicPoint> visited = new HashSet<GeographicPoint>();
 		GeographicPoint curr = start;
 		parents.put(curr, null);
 		queue.add(curr);
+		System.out.println("Added "+curr+" to queue.");
 		while (queue.size() > 0 && !curr.equals(goal)) {
 			curr = queue.remove(0);
 			visited.add(curr);
 			// provide the current node to our consumer for drawing
 			nodeSearched.accept(curr);
-			// get each neighbor, record curr as its parent, and add it to queue
-			List<MapRoad> roads = adjList.get(curr);
-			for (MapRoad r : roads) {
-				GeographicPoint g = r.getOtherEnd(curr);
-				if (!visited.contains(g)) {
-					queue.add(g);
-					parents.put(g, curr);
+			List<GeographicPoint> neighbors = adjList.get(curr);
+			for (GeographicPoint node : neighbors) {
+				if (!visited.contains(node)) {
+					queue.add(node);
+					System.out.println("Added "+node+" to queue.");
+					parents.put(node, curr);
 				}
 
 			}
 		}
-		
+		System.out.println("Finished BFS");
 		if (!curr.equals(goal))
 			return null;
 		else return buildParentPath(curr, parents);
