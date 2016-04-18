@@ -8,6 +8,7 @@
 
 package roadgraph;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 import geography.GeographicPoint;
@@ -15,8 +16,10 @@ import geography.GeographicPoint;
 @SuppressWarnings("serial")
 public class MapNode extends geography.GeographicPoint implements Comparable<MapNode> {
 
-	private double distanceFromStart = java.lang.Double.POSITIVE_INFINITY;
+	private double distanceFromStart;
+	private double estimatedCost;
 	private HashSet<MapRoad> roads;
+	private HashMap<MapNode, java.lang.Double> hopDistances;
 
 	/**
 	 * Build a map node from an existing geographic point
@@ -26,6 +29,7 @@ public class MapNode extends geography.GeographicPoint implements Comparable<Map
 	public MapNode(GeographicPoint gp) {
 		super(gp.getX(), gp.getY());
 		roads = new HashSet<>();
+		hopDistances = new HashMap<>();
 	}
 
 	public boolean addRoad(MapRoad road) {
@@ -34,11 +38,30 @@ public class MapNode extends geography.GeographicPoint implements Comparable<Map
 		if (!road.getFrom().equals(this))
 			throw (new IllegalArgumentException("Assigning road to wrong map node."));
 		roads.add(road);
+		MapNode destination = ((MapNode) road.getTo());
+		java.lang.Double distance = road.getLength();
+		hopDistances.put(destination, distance);
 		return true;
 	}
 	
 	public HashSet<MapRoad> getRoads() {
 		return roads;
+	}
+	
+	public void setDistanceFromStart(double d) {
+		this.distanceFromStart = d;
+	}
+	
+	public double getDistanceFromStart() {
+		return this.distanceFromStart;
+	}
+
+	public double getEstimatedCost() {
+		return estimatedCost;
+	}
+	
+	public void setEstimatedCost(double d) {
+		this.estimatedCost =  d;
 	}
 
 	/**
@@ -50,15 +73,23 @@ public class MapNode extends geography.GeographicPoint implements Comparable<Map
 	 *         other, 0 if they are equally ordered
 	 */
 	public int compareTo(MapNode other) {
-		if (this.distanceFromStart < other.distanceFromStart)
+		if (this.estimatedCost < other.estimatedCost)
 			return -1;
-		if (this.distanceFromStart > other.distanceFromStart)
+		if (this.estimatedCost > other.estimatedCost)
 			return +1;
 		return 0;
 	}
 	
 	public String toString(){
 		return "Node("+getX()+","+getY()+")";
+	}
+
+	public double getHopDistance(MapNode node) {
+		return hopDistances.get(node);
+	}
+	
+	public int hashCode() {
+		return super.hashCode();
 	}
 
 }

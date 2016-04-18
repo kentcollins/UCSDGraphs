@@ -14,8 +14,8 @@ public class MapRoad {
 	
 	public MapRoad(GeographicPoint start, GeographicPoint finish, String roadName,
 			String roadType, double length){
-		from = start;
-		to = finish;
+		from = new MapNode(start);
+		to = new MapNode(finish);
 		this.roadName = roadName;
 		this.roadType = roadType;
 		this.length = length;
