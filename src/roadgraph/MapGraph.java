@@ -283,7 +283,7 @@ public class MapGraph {
 				}
 			}
 		}
-		System.out.println("Dijkstra visited "+numVisited+" nodes");
+		System.out.println("Dijkstra visited " + numVisited + " nodes");
 		return buildParentPath(goal, parents);
 	}
 
@@ -346,13 +346,13 @@ public class MapGraph {
 				MapNode node = nodeMap.get(gp);
 				if (!visited.contains(node)) {
 					double distanceThroughCurr = curr.getDistanceFromStart() + curr.getHopDistance(node);
-					double additionalCost = node.distance(goal); 
+					double additionalCost = node.distance(goal);
 					if (distanceThroughCurr < node.getDistanceFromStart()) {
 						parents.put(node, curr);
 						node.setDistanceFromStart(distanceThroughCurr);
 					}
-					double estimatedTotalCost = node.getDistanceFromStart()+additionalCost;
-				   if (estimatedTotalCost < node.getEstimatedCost()) {
+					double estimatedTotalCost = node.getDistanceFromStart() + additionalCost;
+					if (estimatedTotalCost < node.getEstimatedCost()) {
 						node.setEstimatedCost(estimatedTotalCost);
 						queue.add(node);
 					}
@@ -360,30 +360,91 @@ public class MapGraph {
 				}
 			}
 		}
-		System.out.println("A-Star visited "+numVisited+" nodes");
+		System.out.println("A-Star visited " + numVisited + " nodes");
 		return buildParentPath(goal, parents);
+	}
+
+	/**
+	 * Find the path from start to goal using A-Star search
+	 * 
+	 * @param start
+	 *            The starting location
+	 * @param goal
+	 *            The goal location
+	 * @param nodeSearched
+	 *            A hook for visualization. See assignment instructions for how
+	 *            to use it.
+	 * @return The list of intersections that form the shortest path from start
+	 *         to goal (including both start and goal).
+	 */
+	public List<List<GeographicPoint>> nPaths(GeographicPoint start, GeographicPoint goal, int numToFind,
+			Consumer<GeographicPoint> nodeSearched) {
+		List<List<GeographicPoint>> paths = new ArrayList<List<GeographicPoint>>();
+		int numSoFar = 0;
+		boolean foundAnother = true;
+		while (numSoFar < numToFind && foundAnother) {
+			int numVisited = 0;
+			PriorityQueue<MapNode> queue = new PriorityQueue<>();
+			HashSet<GeographicPoint> visited = new HashSet<>();
+			HashMap<GeographicPoint, GeographicPoint> parents = new HashMap<>();
+			for (GeographicPoint gp : adjList.keySet()) {
+				((MapNode) gp).setDistanceFromStart(Double.POSITIVE_INFINITY);
+				((MapNode) gp).setEstimatedCost(Double.POSITIVE_INFINITY);
+			}
+			MapNode curr = nodeMap.get(start);
+			queue.add(curr);
+			curr.setDistanceFromStart(0);
+			curr.setEstimatedCost(curr.getDistanceFromStart() + curr.distance(goal));
+			parents.put(curr, null);
+			while (queue.size() > 0) {
+				curr = ((MapNode) queue.remove());
+				numVisited++;
+				nodeSearched.accept(curr);
+				if (!visited.contains(curr)) {
+					visited.add(curr);
+				}
+				if (curr.equals(goal)) {
+					break;
+				}
+				for (GeographicPoint gp : adjList.get(curr)) {
+					MapNode node = nodeMap.get(gp);
+					if (!visited.contains(node)) {
+						double distanceThroughCurr = curr.getDistanceFromStart() + curr.getHopDistance(node);
+						double additionalCost = node.distance(goal);
+						if (distanceThroughCurr < node.getDistanceFromStart()) {
+							parents.put(node, curr);
+							node.setDistanceFromStart(distanceThroughCurr);
+						}
+						double estimatedTotalCost = node.getDistanceFromStart() + additionalCost;
+						if (estimatedTotalCost < node.getEstimatedCost()) {
+							node.setEstimatedCost(estimatedTotalCost);
+							queue.add(node);
+						}
+
+					}
+				}
+			}
+			paths.add(buildParentPath(goal, parents));
+		}
+		return paths;
 	}
 
 	public static void main(String[] args) {
 
 		/*
-		 * Use this code in Week 3 End of Week Quiz 
+		 * Use this code in Week 3 End of Week Quiz
 		 */
 		System.out.print("Making a new map...");
 		MapGraph theMap = new MapGraph();
 		System.out.print("DONE. \nLoading the map...");
 		GraphLoader.loadRoadMap("data/maps/utc.map", theMap);
 		System.out.println("DONE.");
-		
-		GeographicPoint start = new GeographicPoint(32.8648772,
-		-117.2254046); GeographicPoint end = new GeographicPoint(32.8660691,
-		-117.217393);
-		
-		
-		 List<GeographicPoint> route = theMap.dijkstra(start,end);
-		 List<GeographicPoint> route2 = theMap.aStarSearch(start,end);
-		 
-		 
+
+		GeographicPoint start = new GeographicPoint(32.8648772, -117.2254046);
+		GeographicPoint end = new GeographicPoint(32.8660691, -117.217393);
+
+		List<GeographicPoint> route = theMap.dijkstra(start, end);
+		List<GeographicPoint> route2 = theMap.aStarSearch(start, end);
 
 	}
 
