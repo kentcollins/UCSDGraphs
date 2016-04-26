@@ -48,6 +48,13 @@ public class MapNode extends geography.GeographicPoint implements Comparable<Map
 		return roads;
 	}
 	
+	public MapRoad getRoadByDestination(MapNode dest) {
+		for (MapRoad road: roads) {
+			if (road.getTo().equals(dest)) return road;
+		}
+		return null;
+	}
+	
 	public void setDistanceFromStart(double d) {
 		this.distanceFromStart = d;
 	}
