@@ -329,15 +329,9 @@ public class MapGraph {
 		PriorityQueue<MapNode> pQueue = new PriorityQueue<>();
 		HashSet<GeographicPoint> visitedNodes = new HashSet<>();
 		HashMap<GeographicPoint, GeographicPoint> parentMap = new HashMap<>();
-		for (GeographicPoint gp : adjacencyList.keySet()) {
-			((MapNode) gp).setDistanceFromStart(Double.POSITIVE_INFINITY);
-			((MapNode) gp).setEstimatedCost(Double.POSITIVE_INFINITY);
-		}
+		initializeNodeCosts();
 		MapNode currNode = nodeMap.get(start);
-		pQueue.add(currNode);
-		currNode.setDistanceFromStart(0);
-		currNode.setEstimatedCost(currNode.getDistanceFromStart() + currNode.distance(goalNode));
-		parentMap.put(currNode, null);
+		initializePriorityQueue(pQueue, parentMap, currNode, goalNode);
 		while (pQueue.size() > 0) {
 			currNode = ((MapNode) pQueue.remove());
 			nodesVisited++;
@@ -352,6 +346,20 @@ public class MapGraph {
 		}
 		System.out.println("A-Star visited " + nodesVisited + " nodes");
 		return buildParentPath(currNode, parentMap);
+	}
+
+	private void initializePriorityQueue(PriorityQueue<MapNode> pQueue, HashMap<GeographicPoint, GeographicPoint> parentMap, MapNode currNode, GeographicPoint goalNode) {
+		pQueue.add(currNode);
+		currNode.setDistanceFromStart(0);
+		currNode.setEstimatedCost(currNode.getDistanceFromStart() + currNode.distance(goalNode));
+		parentMap.put(currNode, null);
+	}
+
+	private void initializeNodeCosts() {
+		for (GeographicPoint gp : adjacencyList.keySet()) {
+			((MapNode) gp).setDistanceFromStart(Double.POSITIVE_INFINITY);
+			((MapNode) gp).setEstimatedCost(Double.POSITIVE_INFINITY);
+		}
 	}
 
 	private void addNextHopsToPrioritizedQueue(HashSet<GeographicPoint> visited,
