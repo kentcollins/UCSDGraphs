@@ -369,29 +369,31 @@ public class MapGraph {
 	 * @param visited
 	 * @param parents
 	 * @param queue
-	 * @param curr
+	 * @param currNode
 	 * @param goal
 	 * @param ommitted
 	 */
 	private void addNextHopsToPrioritizedQueue(HashSet<GeographicPoint> visited,
-			HashMap<GeographicPoint, GeographicPoint> parents, PriorityQueue<MapNode> queue, MapNode curr,
+			HashMap<GeographicPoint, GeographicPoint> parents, PriorityQueue<MapNode> queue, MapNode currNode,
 			GeographicPoint goal, MapRoad forbidden) {
-		for (GeographicPoint gp : adjacencyList.get(curr)) {
-			MapNode node = nodeMap.get(gp);
-			if (!visited.contains(node)) {
-				if (forbidden != null) continue;
-				double distanceThroughCurr = curr.getDistanceFromStart() + curr.getHopDistance(node);
-				double additionalCost = node.distance(goal);
-				if (distanceThroughCurr < node.getDistanceFromStart()) {
-					parents.put(node, curr);
-					node.setDistanceFromStart(distanceThroughCurr);
+		for (GeographicPoint gp : adjacencyList.get(currNode)) {
+			MapNode oneHopNode = nodeMap.get(gp);
+			if (!visited.contains(oneHopNode)) {
+				// a forbidden node has not been provided or one has but is not the edge
+				// leading to oneHopNode
+				if (forbidden == null && !currNode.getRoadByDestination(oneHopNode).equals(forbidden)) {
+					double distanceThroughCurr = currNode.getDistanceFromStart() + currNode.getHopDistance(oneHopNode);
+					double additionalCost = oneHopNode.distance(goal);
+					if (distanceThroughCurr < oneHopNode.getDistanceFromStart()) {
+						parents.put(oneHopNode, currNode);
+						oneHopNode.setDistanceFromStart(distanceThroughCurr);
+					}
+					double estimatedTotalCost = oneHopNode.getDistanceFromStart() + additionalCost;
+					if (estimatedTotalCost < oneHopNode.getEstimatedCost()) {
+						oneHopNode.setEstimatedCost(estimatedTotalCost);
+						queue.add(oneHopNode);
+					}
 				}
-				double estimatedTotalCost = node.getDistanceFromStart() + additionalCost;
-				if (estimatedTotalCost < node.getEstimatedCost()) {
-					node.setEstimatedCost(estimatedTotalCost);
-					queue.add(node);
-				}
-
 			}
 		}
 	}
@@ -400,23 +402,32 @@ public class MapGraph {
 	 * Given a path from an aStar search, remove sequentially each edge between
 	 * start and finish nodes and determine whether an aStar search yields an
 	 * alternate path when each edge is removed. Arrange resulting paths
-	 * (alternate routes) from shortest to longest (highest to lowest cost)
+	 * (alternate routes) from shortest to longest (lowest to highest cost)
 	 *
 	 * @param path
 	 *            A sequence of geographic points lying along an aStar path
 	 * @return A list of "next best" paths that would result if for each edge in
-	 *         the path, the edge were removed from the graph.
+	 *         the path, that edge were removed from the graph.
 	 */
 	public List<ArrayList<GeographicPoint>> altRoutes(List<GeographicPoint> path) {
+		List<MapRoad> route = buildRouteFromPath(path);
 		List<ArrayList<GeographicPoint>> alts = new ArrayList<ArrayList<GeographicPoint>>();
-		for (int i = 0; i < path.size() - 1; i++) {
-			MapNode segmentStart = (MapNode) path.get(i);
-			MapNode segmentEnd = (MapNode) path.get(i + 1);
-			MapRoad edgeToDrop = segmentStart.getRoadByDestination(segmentEnd);
-
+		for (MapRoad road: route) {
+			List<GeographicPoint> altPath = null;//TODO finish this thought
 		}
 
 		return alts;
+	}
+
+	private List<MapRoad> buildRouteFromPath(List<GeographicPoint> path) {
+		List<MapRoad> route = new ArrayList<>();
+		for (int i = 0; i < path.size() - 1; i++) {
+			MapNode segmentStart = (MapNode) path.get(i);
+			MapNode segmentEnd = (MapNode) path.get(i + 1);
+			MapRoad roadBetween = segmentStart.getRoadByDestination(segmentEnd);
+			route.add(roadBetween);
+		}
+		return route;
 	}
 
 	public static void main(String[] args) {
