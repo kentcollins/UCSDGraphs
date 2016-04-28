@@ -387,8 +387,7 @@ public class MapGraph {
 		for (GeographicPoint gp : adjacencyList.get(currNode)) {
 			MapNode oneHopNode = nodeMap.get(gp);
 			if (!visited.contains(oneHopNode)) {
-				// a forbidden node has not been provided or one has but is not the edge
-				// leading to oneHopNode
+				// node not provided or one has but is not the edge leading to oneHopNode
 				if (forbidden == null && !currNode.getRoadByDestination(oneHopNode).equals(forbidden)) {
 					double distanceThroughCurr = currNode.getDistanceFromStart() + currNode.getHopDistance(oneHopNode);
 					double additionalCost = oneHopNode.distance(goal);
