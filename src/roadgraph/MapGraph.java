@@ -348,6 +348,34 @@ public class MapGraph {
 		return buildParentPath(currNode, parentMap);
 	}
 
+	public ArrayList<GeographicPoint> aStarSpecial(GeographicPoint start, GeographicPoint goalNode,
+			MapRoad omit) {
+		int nodesVisited = 0;
+		PriorityQueue<MapNode> pQueue = new PriorityQueue<>();
+		HashSet<GeographicPoint> visitedNodes = new HashSet<>();
+		HashMap<GeographicPoint, GeographicPoint> parentMap = new HashMap<>();
+		initializeNodeCosts();
+		MapNode currNode = nodeMap.get(start);
+		initializePriorityQueue(pQueue, parentMap, currNode, goalNode);
+		while (pQueue.size() > 0) {
+			currNode = ((MapNode) pQueue.remove());
+			nodesVisited++;
+			if (!visitedNodes.contains(currNode)) {
+				visitedNodes.add(currNode);
+			}
+			if (currNode.equals(goalNode)) {
+				break;
+			}
+			addNextHopsToPrioritizedQueue(visitedNodes, parentMap, pQueue, currNode, goalNode, omit);
+		}
+		System.out.println("A-Star visited " + nodesVisited + " nodes");
+		ArrayList<GeographicPoint> alist = new ArrayList<GeographicPoint>();
+		for (GeographicPoint gp: buildParentPath(currNode, parentMap)) {
+			alist.add(gp);
+		}
+		return alist;
+	}
+	
 	private void initializePriorityQueue(PriorityQueue<MapNode> pQueue, HashMap<GeographicPoint, GeographicPoint> parentMap, MapNode currNode, GeographicPoint goalNode) {
 		pQueue.add(currNode);
 		currNode.setDistanceFromStart(0);
@@ -420,9 +448,9 @@ public class MapGraph {
 		List<MapRoad> route = buildRouteFromPath(path);
 		List<ArrayList<GeographicPoint>> alts = new ArrayList<ArrayList<GeographicPoint>>();
 		for (MapRoad road: route) {
-			List<GeographicPoint> altPath = null;//TODO finish this thought
+			ArrayList<GeographicPoint> altPath = aStarSpecial(path.get(0), path.get(path.size()-1), road);
+			if (alts.size()>1) alts.add(altPath);
 		}
-
 		return alts;
 	}
 
@@ -453,7 +481,11 @@ public class MapGraph {
 
 		List<GeographicPoint> route = theMap.dijkstra(start, end);
 		List<GeographicPoint> route2 = theMap.aStarSearch(start, end);
-
+		List<ArrayList<GeographicPoint>> alts = theMap.altRoutes(route2);
+		System.out.println(route2);
+		for (ArrayList<GeographicPoint> list : alts) {
+			System.out.println(list);
+		}
 	}
 
 }
